@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabari Store - Fresh Groceries & Daily Essentials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-emerald-700 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium">
+        <span><i class="fa-solid fa-bolt mr-1"></i> Express Delivery in 15-30 Minutes | Free Delivery on Orders Above ₹499</span>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="filterCategory('All')">
+                <div class="bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow-md">
+                    S
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-tight text-emerald-800">Sabari</span>
+                    <span class="text-xl font-light text-slate-600">Store</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-xl hidden md:flex items-center relative">
+                <span class="absolute left-3.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search for fresh vegetables, fruits, rice, oil..." class="w-full pl-10 pr-10 py-2.5 bg-slate-100 border border-transparent rounded-full focus:bg-white focus:border-emerald-500 focus:outline-none text-sm transition">
+                <button onclick="clearSearch()" id="clearSearchBtn" class="absolute right-3.5 text-slate-400 hover:text-slate-600 hidden"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openProfileModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 text-sm font-medium">
+                    <i class="fa-regular fa-user text-emerald-600 text-lg"></i>
+                    <span>Account</span>
+                </button>
+                <button onclick="toggleCartDrawer()" class="relative bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-full flex items-center gap-2 shadow-sm transition">
+                    <i class="fa-solid fa-shopping-bag"></i>
+                    <span class="font-semibold text-sm hidden sm:inline">Cart</span>
+                    <span id="cartBadge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="px-4 pb-3 md:hidden">
+            <div class="relative flex items-center">
+                <span class="absolute left-3.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
+                <input type="text" id="mobileSearchInput" oninput="handleMobileSearch()" placeholder="Search groceries..." class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Hero Promotional Banner -->
+        <div class="bg-gradient-to-r from-emerald-800 to-teal-700 rounded-2xl text-white p-6 sm:p-10 mb-8 shadow-lg relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute right-0 bottom-0 opacity-10 translate-x-10 translate-y-10 text-9xl">
+                <i class="fa-solid fa-basket-shopping"></i>
+            </div>
+            <div class="max-w-xl z-10">
+                <span class="bg-amber-400 text-slate-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Super Saver Week</span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">Fresh Farm Produce Delivered to Your Doorstep</h1>
+                <p class="mt-2 text-emerald-100 text-sm sm:text-base">Get pesticide-free vegetables, premium grains, and daily dairy items at wholesale prices.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button onclick="filterCategory('Vegetables')" class="bg-white text-emerald-900 hover:bg-emerald-50 font-semibold px-5 py-2.5 rounded-xl text-sm shadow transition">Shop Vegetables</button>
+                    <button onclick="filterCategory('All')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm border border-emerald-500 transition">View All Products</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Selector Row -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-slate-900">Shop by Category</h2>
+                <span id="activeCategoryLabel" class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Showing: All</span>
+            </div>
+            <div id="categoryContainer" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-3">
+                <!-- Dynamically rendered categories -->
+            </div>
+        </div>
+
+        <!-- Filter & Sort Bar -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-slate-600"><i class="fa-solid fa-filter mr-1 text-emerald-600"></i> Sort by:</span>
+                <select id="sortSelect" onchange="sortProducts()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500">
+                    <option value="default">Featured</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rated</option>
+                </select>
+            </div>
+            <div class="text-sm text-slate-500">
+                Showing <span id="productCount" class="font-bold text-slate-800">0</span> items
+            </div>
+        </div>
+
+        <!-- Product Catalog Grid -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Rendered Products -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-4xl text-slate-300 mb-3"><i class="fa-solid fa-box-open"></i></div>
+            <h3 class="text-lg font-bold text-slate-700">No products found</h3>
+            <p class="text-sm text-slate-500 mt-1">Try searching for something else or reset your filters.</p>
+            <button onclick="resetFilters()" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Reset Filters</button>
+        </div>
+    </main>
+
+    <!-- Cart Slide-Over Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onclick="toggleCartDrawer()"></div>
+        <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+                <!-- Cart Header -->
+                <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-shopping-bag text-emerald-400"></i>
+                        <h3 class="font-bold text-lg">Your Grocery Cart</h3>
+                    </div>
+                    <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <!-- Free Delivery Progress Bar -->
+                <div class="bg-emerald-50 p-3 border-b border-emerald-100">
+                    <div class="flex justify-between text-xs font-semibold text-emerald-800 mb-1">
+                        <span id="freeDeliveryText">Add ₹499 more for FREE Delivery</span>
+                        <span id="freeDeliveryPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-emerald-200 h-2 rounded-full overflow-hidden">
+                        <div id="freeDeliveryBar" class="bg-emerald-600 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Cart items populated here -->
+                </div>
+
+                <!-- Cart Footer & Checkout -->
+                <div class="border-t border-slate-200 p-4 bg-slate-50">
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Subtotal</span>
+                            <span id="cartSubtotal" class="font-semibold text-slate-800">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Delivery Charges</span>
+                            <span id="cartDelivery" class="font-semibold text-emerald-600">₹40</span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between text-base font-bold text-slate-900">
+                            <span>Total Amount</span>
+                            <span id="cartTotal" class="text-emerald-700">₹0</span>
+                        </div>
+                    </div>
+                    <button onclick="openCheckoutModal()" id="checkoutBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2">
+                        <span>Proceed to Checkout</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeCheckoutModal()"></div>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-700 text-white p-4 flex items-center justify-between">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-shield-halved mr-2"></i> Secure Checkout</h3>
+                <button onclick="closeCheckoutModal()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5">
+                <!-- Step 1: Delivery Address -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2 text-sm"><i class="fa-solid fa-location-dot text-emerald-600 mr-1"></i> Delivery Address</h4>
+                    <div class="space-y-3">
+                        <input type="text" id="custName" placeholder="Full Name" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500" required>
+                        <input type="text" id="custPhone" placeholder="Mobile Number (e.g., 9876543210)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500" required>
+                        <textarea id="custAddress" placeholder="Flat / House No., Apartment, Street, Landmark, Pincode" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 2: Delivery Slot -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2 text-sm"><i class="fa-regular fa-clock text-emerald-600 mr-1"></i> Delivery Slot</h4>
+                    <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+                        <label class="border border-emerald-500 bg-emerald-50 p-2.5 rounded-lg text-center cursor-pointer flex flex-col items-center">
+                            <input type="radio" name="slot" value="Express (15-30 mins)" checked class="mb-1 accent-emerald-600">
+                            <span>Express</span>
+                            <span class="text-[10px] text-emerald-700 font-normal">15-30 mins</span>
+                        </label>
+                        <label class="border border-slate-200 p-2.5 rounded-lg text-center cursor-pointer flex flex-col items-center hover:bg-slate-50">
+                            <input type="radio" name="slot" value="Today (2 PM - 5 PM)" class="mb-1 accent-emerald-600">
+                            <span>Today Afternoon</span>
+                            <span class="text-[10px] text-slate-500 font-normal">2 PM - 5 PM</span>
+                        </label>
+                        <label class="border border-slate-200 p-2.5 rounded-lg text-center cursor-pointer flex flex-col items-center hover:bg-slate-50">
+                            <input type="radio" name="slot" value="Tomorrow Morning" class="mb-1 accent-emerald-600">
+                            <span>Tomorrow</span>
+                            <span class="text-[10px] text-slate-500 font-normal">8 AM - 11 AM</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 3: Payment Method -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2 text-sm"><i class="fa-solid fa-wallet text-emerald-600 mr-1"></i> Payment Method</h4>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="payment" value="UPI" checked class="accent-emerald-600">
+                            <i class="fa-solid fa-mobile-screen-button text-purple-600 w-5"></i>
+                            <div>
+                                <span class="font-semibold">UPI / Google Pay / PhonePe / Paytm</span>
+                                <p class="text-xs text-slate-500">Pay securely using any UPI app</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="payment" value="Card" class="accent-emerald-600">
+                            <i class="fa-regular fa-credit-card text-blue-600 w-5"></i>
+                            <div>
+                                <span class="font-semibold">Credit / Debit Card</span>
+                                <p class="text-xs text-slate-500">Visa, MasterCard, RuPay</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="payment" value="COD" class="accent-emerald-600">
+                            <i class="fa-solid fa-money-bill-wave text-emerald-600 w-5"></i>
+                            <div>
+                                <span class="font-semibold">Cash on Delivery (COD)</span>
+                                <p class="text-xs text-slate-500">Pay when your order arrives</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500">Total Payable</span>
+                    <div id="modalTotalAmount" class="text-lg font-bold text-slate-900">₹0</div>
+                </div>
+                <button onclick="processOrder()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow transition">
+                    Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Success / Confirmation Receipt Modal with WhatsApp Integration -->
+    <div id="successModal" class="fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full relative z-10 p-6 text-center">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 animate-bounce">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900">Order Placed Successfully!</h3>
+            <p class="text-sm text-slate-500 mt-1">Thank you for shopping with <span class="font-bold text-emerald-700">Sabari Store</span>.</p>
+            
+            <div class="bg-slate-50 p-4 rounded-xl my-4 text-left text-xs space-y-2 border border-slate-100">
+                <div class="flex justify-between"><span class="text-slate-500">Order ID:</span> <span id="receiptOrderId" class="font-mono font-bold text-slate-800">#SB-98421</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Delivery Slot:</span> <span id="receiptSlot" class="font-semibold text-slate-800">Express (15-30 mins)</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Payment Mode:</span> <span id="receiptPayment" class="font-semibold text-slate-800">UPI</span></div>
+                <div class="flex justify-between border-t pt-2 font-bold text-sm text-slate-900"><span>Amount Paid:</span> <span id="receiptTotal" class="text-emerald-700">₹0</span></div>
+            </div>
+
+            <!-- WhatsApp Notification Button -->
+            <div class="mb-4">
+                <a id="whatsappNotifyBtn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm shadow flex items-center justify-center gap-2 transition">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Notify Order on WhatsApp (9361440898)</span>
+                </a>
+                <p class="text-[11px] text-slate-400 mt-1">Click to instantly send your order details to WhatsApp number 9361440898</p>
+            </div>
+
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-bold text-sm transition">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- Account Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeProfileModal()"></div>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full relative z-10 p-6 text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3">
+                SS
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Sabari Customer</h3>
+            <p class="text-xs text-slate-500 mt-0.5">sabari.store@example.com</p>
+            <div class="mt-5 space-y-2 text-left">
+                <div class="bg-slate-50 p-3 rounded-lg text-xs flex justify-between items-center">
+                    <span class="text-slate-500">Saved Addresses</span>
+                    <span class="font-bold text-emerald-600">1 Address</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg text-xs flex justify-between items-center">
+                    <span class="text-slate-500">Wallet Balance</span>
+                    <span class="font-bold text-emerald-600">₹150.00</span>
+                </div>
+            </div>
+            <button onclick="closeProfileModal()" class="mt-6 w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm">Close</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-8 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="bg-emerald-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">S</div>
+                <span class="text-white font-bold text-base">Sabari Store</span>
+            </div>
+            <p>© 2026 Sabari Store, Inc. All rights reserved. Fresh Groceries & Daily Needs.</p>
+            <div class="flex gap-4 text-white text-base">
+                <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Categories list
+        const categories = [
+            { name: 'All', icon: 'fa-border-all' },
+            { name: 'Vegetables', icon: 'fa-carrot' },
+            { name: 'Fruits', icon: 'fa-apple-whole' },
+            { name: 'Dairy & Eggs', icon: 'fa-cow' },
+            { name: 'Rice & Dal', icon: 'fa-bowl-rice' },
+            { name: 'Spices & Oils', icon: 'fa-pepper-hot' },
+            { name: 'Snacks', icon: 'fa-cookie' },
+            { name: 'Beverages', icon: 'fa-mug-hot' },
+            { name: 'Household', icon: 'fa-spray-can-sparkles' }
+        ];
+
+        // Product Catalog Data
+        const products = [
+            { id: 1, name: 'Fresh Organic Tomatoes', category: 'Vegetables', price: 35, originalPrice: 50, weight: '1 kg', rating: 4.8, image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80', badge: '30% OFF' },
+            { id: 2, name: 'Alphonso Mangoes', category: 'Fruits', price: 299, originalPrice: 399, weight: '1 kg', rating: 4.9, image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=500&q=80', badge: 'Seasonal' },
+            { id: 3, name: 'Amul Fresh Cow Milk', category: 'Dairy & Eggs', price: 32, originalPrice: 34, weight: '500 ml', rating: 4.9, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80', badge: 'Best Seller' },
+            { id: 4, name: 'Farm Fresh Brown Eggs', category: 'Dairy & Eggs', price: 90, originalPrice: 110, weight: '6 pcs', rating: 4.7, image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=500&q=80', badge: '18% OFF' },
+            { id: 5, name: 'Basmati Premium Rice', category: 'Rice & Dal', price: 145, originalPrice: 180, weight: '1 kg', rating: 4.8, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80', badge: 'Top Rated' },
+            { id: 6, name: 'Toor Dal (Pigeon Peas)', category: 'Rice & Dal', price: 130, originalPrice: 150, weight: '1 kg', rating: 4.6, image: 'https://images.unsplash.com/photo-1585998016428-2b8108c90332?auto=format&fit=crop&w=500&q=80', badge: 'Organic' },
+            { id: 7, name: 'Kashmiri Red Chilli Powder', category: 'Spices & Oils', price: 95, originalPrice: 120, weight: '200 g', rating: 4.7, image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=500&q=80', badge: 'Pure' },
+            { id: 8, name: 'Cold Pressed Sunflower Oil', category: 'Spices & Oils', price: 180, originalPrice: 220, weight: '1 Litre', rating: 4.8, image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80', badge: 'Healthy' },
+            { id: 9, name: 'Fresh Cavendish Bananas', category: 'Fruits', price: 55, originalPrice: 70, weight: '1 Dozen', rating: 4.7, image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=500&q=80', badge: 'Fresh' },
+            { id: 10, name: 'Red Onions', category: 'Vegetables', price: 40, originalPrice: 60, weight: '1 kg', rating: 4.5, image: 'https://images.unsplash.com/photo-1618512495648-7c04d9d9f1d5?auto=format&fit=crop&w=500&q=80', badge: 'Essential' },
+            { id: 11, name: 'Roasted Almonds & Cashews', category: 'Snacks', price: 349, originalPrice: 450, weight: '250 g', rating: 4.9, image: 'https://images.unsplash.com/photo-1508061253366-f7da15bbf6e4?auto=format&fit=crop&w=500&q=80', badge: 'Crunchy' },
+            { id: 12, name: 'Darjeeling Leaf Tea', category: 'Beverages', price: 210, originalPrice: 250, weight: '250 g', rating: 4.8, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80', badge: 'Aromatic' },
+            { id: 13, name: 'Dishwash Gel Lemon', category: 'Household', price: 99, originalPrice: 130, weight: '500 ml', rating: 4.6, image: 'https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=500&q=80', badge: 'Offer' },
+            { id: 14, name: 'Fresh Green Spinach (Palak)', category: 'Vegetables', price: 20, originalPrice: 30, weight: '250 g', rating: 4.7, image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=500&q=80', badge: 'Farm Fresh' },
+            { id: 15, name: 'Crisp Royal Gala Apples', category: 'Fruits', price: 180, originalPrice: 220, weight: '1 kg', rating: 4.9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=500&q=80', badge: 'Imported' },
+            { id: 16, name: 'Curd (Dahi)', category: 'Dairy & Eggs', price: 45, originalPrice: 50, weight: '400 g', rating: 4.8, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80', badge: 'Fresh' }
+        ];
+
+        let cart = [];
+        let activeCategory = 'All';
+        let searchQuery = '';
+
+        // Initialize application
+        window.onload = function() {
+            renderCategories();
+            renderProducts();
+            updateCartUI();
+        };
+
+        // Render Category pills
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterCategory('${cat.name}')" class="flex flex-col items-center p-3 rounded-xl border transition ${activeCategory === cat.name ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm' : 'border-slate-100 bg-white text-slate-700 hover:border-emerald-200'}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg ${activeCategory === cat.name ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                        <i class="fa-solid ${cat.icon}"></i>
+                    </div>
+                    <span class="text-xs font-semibold mt-2 text-center truncate w-full">${cat.name}</span>
+                </button>
+            `).join('');
+            document.getElementById('activeCategoryLabel').innerText = `Showing: ${activeCategory}`;
+        }
+
+        // Filter by Category
+        function filterCategory(catName) {
+            activeCategory = catName;
+            renderCategories();
+            renderProducts();
+        }
+
+        // Search Handlers
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.getElementById('mobileSearchInput').value = searchQuery;
+            document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery === '');
+            renderProducts();
+        }
+
+        function handleMobileSearch() {
+            searchQuery = document.getElementById('mobileSearchInput').value.trim().toLowerCase();
+            document.getElementById('searchInput').value = searchQuery;
+            renderProducts();
+        }
+
+        function clearSearch() {
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('mobileSearchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderProducts();
+        }
+
+        function resetFilters() {
+            activeCategory = 'All';
+            clearSearch();
+        }
+
+        // Sort Products
+        function sortProducts() {
+            renderProducts();
+        }
+
+        // Render Product Catalog
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const emptyState = document.getElementById('emptyState');
+            const sortVal = document.getElementById('sortSelect').value;
+
+            let filtered = products.filter(p => {
+                const matchesCat = activeCategory === 'All' || p.category === activeCategory;
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.category.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            // Sorting logic
+            if (sortVal === 'price-low') filtered.sort((a,b) => a.price - b.price);
+            if (sortVal === 'price-high') filtered.sort((a,b) => b.price - a.price);
+            if (sortVal === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+
+            document.getElementById('productCount').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(product => {
+                const cartItem = cart.find(item => item.id === product.id);
+                const qty = cartItem ? cartItem.qty : 0;
+
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col overflow-hidden group">
+                        <div class="relative bg-slate-100 h-48 overflow-hidden">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">${product.badge}</span>
+                            <span class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-2 py-0.5 rounded-md shadow-sm">${product.weight}</span>
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow">
+                            <div class="text-[11px] font-semibold text-emerald-600 uppercase tracking-wide mb-1">${product.category}</div>
+                            <h3 class="font-bold text-slate-800 text-sm line-clamp-1 mb-1">${product.name}</h3>
+                            <div class="flex items-center gap-1 text-amber-500 text-xs mb-3">
+                                <i class="fa-solid fa-star"></i>
+                                <span class="font-bold text-slate-700">${product.rating}</span>
+                            </div>
+                            <div class="mt-auto flex items-center justify-between">
+                                <div>
+                                    <span class="text-base font-black text-slate-900">₹${product.price}</span>
+                                    <span class="text-xs text-slate-400 line-through ml-1">₹${product.originalPrice}</span>
+                                </div>
+                                ${qty === 0 ? `
+                                    <button onclick="addToCart(${product.id})" class="bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-bold px-4 py-2 rounded-xl text-xs transition border border-emerald-200 hover:border-emerald-600">
+                                        ADD
+                                    </button>
+                                ` : `
+                                    <div class="flex items-center bg-emerald-600 text-white rounded-xl overflow-hidden shadow-sm">
+                                        <button onclick="updateQty(${product.id}, -1)" class="px-2.5 py-1.5 hover:bg-emerald-700 text-xs"><i class="fa-solid fa-minus"></i></button>
+                                        <span class="px-2 text-xs font-bold">${qty}</span>
+                                        <button onclick="updateQty(${product.id}, 1)" class="px-2.5 py-1.5 hover:bg-emerald-700 text-xs"><i class="fa-solid fa-plus"></i></button>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cart Drawer Management
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            renderProducts();
+            updateCartUI();
+        }
+
+        function updateQty(productId, change) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+            item.qty += change;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            renderProducts();
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartBadge').innerText = totalCount;
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const deliveryFee = subtotal >= 499 || subtotal === 0 ? 0 : 40;
+            const total = subtotal + deliveryFee;
+
+            document.getElementById('cartSubtotal').innerText = `₹${subtotal}`;
+            document.getElementById('cartDelivery').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+            document.getElementById('cartTotal').innerText = `₹${total}`;
+
+            // Free delivery progress
+            const freeThreshold = 499;
+            const percent = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
+            document.getElementById('freeDeliveryBar').style.width = `${percent}%`;
+            document.getElementById('freeDeliveryPercent').innerText = `${percent}%`;
+
+            if (subtotal >= freeThreshold) {
+                document.getElementById('freeDeliveryText').innerText = '🎉 You have unlocked FREE Delivery!';
+            } else {
+                document.getElementById('freeDeliveryText').innerText = `Add ₹${freeThreshold - subtotal} more for FREE Delivery`;
+            }
+
+            // Render cart items
+            const list = document.getElementById('cartItemsList');
+            if (cart.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-slate-300"></i>
+                        <p class="text-sm font-medium">Your cart is empty</p>
+                        <p class="text-xs text-slate-400 mt-1">Add items from the catalog to start shopping</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = cart.map(item => `
+                <div class="flex items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <img src="${item.image}" class="w-14 h-14 object-cover rounded-lg">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-800 text-xs truncate">${item.name}</h4>
+                        <span class="text-[11px] text-slate-500">${item.weight}</span>
+                        <div class="text-emerald-700 font-bold text-xs mt-1">₹${item.price * item.qty}</div>
+                    </div>
+                    <div class="flex items-center bg-white border rounded-lg overflow-hidden shadow-sm">
+                        <button onclick="updateQty(${item.id}, -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs"><i class="fa-solid fa-minus"></i></button>
+                        <span class="px-2 text-xs font-bold">${item.qty}</span>
+                        <button onclick="updateQty(${item.id}, 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Checkout Modal Actions
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            toggleCartDrawer();
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const deliveryFee = subtotal >= 499 ? 0 : 40;
+            document.getElementById('modalTotalAmount').innerText = `₹${subtotal + deliveryFee}`;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        // Process Order & WhatsApp Integration
+        function processOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                alert('Please fill in all delivery details.');
+                return;
+            }
+
+            const slot = document.querySelector('input[name="slot"]:checked').value;
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const deliveryFee = subtotal >= 499 ? 0 : 40;
+            const total = subtotal + deliveryFee;
+            const orderId = '#SB-' + Math.floor(10000 + Math.random() * 90000);
+
+            // Populate success receipt
+            document.getElementById('receiptOrderId').innerText = orderId;
+            document.getElementById('receiptSlot').innerText = slot;
+            document.getElementById('receiptPayment').innerText = payment;
+            document.getElementById('receiptTotal').innerText = `₹${total}`;
+
+            // Build WhatsApp message for 9361440898
+            let itemsText = cart.map(item => `• ${item.name} (${item.weight}) x ${item.qty} = ₹${item.price * item.qty}`).join('%0a');
+            let waMessage = `🛍️ *NEW ORDER RECEIVED - SABARI STORE*%0a%0a` +
+                            `*Order ID:* ${orderId}%0a` +
+                            `*Customer Name:* ${name}%0a` +
+                            `*Phone:* ${phone}%0a` +
+                            `*Delivery Address:* ${address}%0a` +
+                            `*Delivery Slot:* ${slot}%0a` +
+                            `*Payment Mode:* ${payment}%0a%0a` +
+                            `*Items Ordered:*%0a${itemsText}%0a%0a` +
+                            `*Total Amount:* ₹${total}%0a%0a` +
+                            `Please confirm and dispatch this order.`;
+
+            document.getElementById('whatsappNotifyBtn').href = `https://wa.me/9361440898?text=${waMessage}`;
+
+            closeCheckoutModal();
+            document.getElementById('successModal').classList.remove('hidden');
+
+            // Clear cart after successful order
+            cart = [];
+            renderProducts();
+            updateCartUI();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // Profile Modal
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
